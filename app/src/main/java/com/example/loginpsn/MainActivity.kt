@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -34,7 +36,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.sp
 import com.example.loginpsn.ui.theme.LoginPSNTheme
 
 class MainActivity : ComponentActivity() {
@@ -44,14 +51,46 @@ class MainActivity : ComponentActivity() {
         setContent {
             LoginPSNTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(modifier = Modifier.padding(innerPadding))
+                    Column(modifier = Modifier.fillMaxSize().padding(innerPadding).paint(painter = painterResource(R.drawable.background),
+                        contentScale = ContentScale.FillBounds)){
+
+                        TitleText(Modifier.fillMaxWidth().weight(1f).padding(20.dp),contentAlignment = Alignment.BottomStart,"Sign In to PlayStation Network")
+
+                        Column(modifier = Modifier.fillMaxWidth().weight(6f)){
+                            Row (modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)){
+                                Image(modifier = Modifier.size(40.dp).padding(5.dp), painter = painterResource(R.drawable.logo)
+                                    ,contentScale = ContentScale.FillBounds
+                                    , contentDescription = "Logo")
+
+                                Text(text = "PlayStation Network", color = Color.White)
+//                            }
+//                            Text()
+//                            OutlinedTextField(){
+//
+//                            }
+//                            OutlinedTextField(){
+//
+//                            }
+//
+//                            Button() { }
+                        }
+
+
+                        //Pruebas()
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun Greeting(modifier: Modifier = Modifier) {
+    @Composable
+    fun TitleText(modifier: Modifier, contentAlignment: Alignment,text: String) {
+        Box(modifier, contentAlignment = contentAlignment) {
+            Text(
+                text = text, color = Color.White,
+                fontSize = 25.sp
+            )
+        }
+    }
 }
