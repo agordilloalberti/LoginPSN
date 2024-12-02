@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -23,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,58 +55,31 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     var textEmail by rememberSaveable { mutableStateOf("")}
                     var textPasswd by rememberSaveable { mutableStateOf("")}
+                    var isValid by rememberSaveable { mutableStateOf(true) }
+                    var dismissed by rememberSaveable { mutableStateOf(true) }
 
                     val id = "usuario@gmail.com"
                     val password = "1234"
-                    var colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedTextColor = Color.LightGray,
-                        focusedTextColor = Color.White,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.LightGray,
-                        focusedPlaceholderColor = Color.LightGray,
-                        unfocusedPlaceholderColor = Color.LightGray
-                    )
-
-                    val colorsDef = OutlinedTextFieldDefaults.colors(
-                        unfocusedTextColor = Color.LightGray,
-                        focusedTextColor = Color.White,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.LightGray,
-                        focusedPlaceholderColor = Color.LightGray,
-                        unfocusedPlaceholderColor = Color.LightGray
-                    )
-                    val colorsBad = OutlinedTextFieldDefaults.colors(
-                        unfocusedTextColor = Color.LightGray,
-                        focusedTextColor = Color.White,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        focusedBorderColor = Color.Red,
-                        unfocusedBorderColor = Color.Red,
-                        focusedLabelColor = Color.Red,
-                        unfocusedLabelColor = Color.Red,
-                        focusedPlaceholderColor = Color.LightGray,
-                        unfocusedPlaceholderColor = Color.LightGray
-                    )
 
 
                     Login(
                         Modifier.padding(innerPadding)
+                        ,isValid
                         ,textEmail
                         ,textPasswd
-                        ,colors
+                        ,dismissed
                         ,{textPasswd = it}
                         ,{textEmail = it}
                         ,{
-                            colors = if (textEmail==id && textPasswd==password){
-                                colorsDef
+                            isValid = !(textEmail!=id || textPasswd!=password)
+                            if (isValid){
+                                dismissed=false
                             }else{
-                                colorsBad
+                                textPasswd=""
                             }
-                        })
+                        }
+                        ,{dismissed = !dismissed}
+                    )
                 }
             }
         }
@@ -115,12 +89,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Login(
     modifier: Modifier
+    , isValid: Boolean
     , textEmail:String
     , textPasswd:String
-    ,colors: TextFieldColors
+    , dismissed :Boolean
     , changePasswd:(String) ->Unit
     , changeEmail:(String) ->Unit
-    , onClick: () -> Unit
+    ,onClick: () -> Unit
+    ,dismiss: () -> Unit
     ){
 
     Column(
@@ -135,25 +111,26 @@ fun Login(
         TitleText(
             Modifier
                 .fillMaxWidth()
-                .padding(20.dp,20.dp,0.dp,5.dp),
+                .padding(20.dp, 20.dp, 0.dp, 5.dp),
             contentAlignment = Alignment.BottomStart,
             text = "Sign In to PlayStation Network"
         )
 
         HorizontalDivider(
             modifier = Modifier
-            .background(colorResource(R.color.lightGray))
-            .fillMaxWidth()
-            .height(1.dp))
+                .background(colorResource(R.color.lightGray))
+                .fillMaxWidth()
+                .height(1.dp))
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(0.dp,30.dp,0.dp,0.dp),
+                .padding(0.dp, 30.dp, 0.dp, 0.dp),
         ) {
             Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Image(
-                    modifier = Modifier.size(65.dp, 55.dp)
+                    modifier = Modifier
+                        .size(65.dp, 55.dp)
                         .padding(5.dp),
                     painter = painterResource(R.drawable.logo),
                     contentScale = ContentScale.FillBounds,
@@ -170,15 +147,16 @@ fun Login(
                 )
             }
 
-            Text(modifier = Modifier.align(Alignment.CenterHorizontally)
-                .padding(5.dp,30.dp,5.dp,15.dp),
+            Text(modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(5.dp, 30.dp, 5.dp, 15.dp),
                 text = "Go online by signing in to PlayStation Network",
                 color = Color.White,
                 fontSize = 17.sp)
 
             CampoDeTexto(
                 textEmail,
-                colors,
+                isValid,
                 changeEmail,
                 Modifier.align(Alignment.CenterHorizontally),
                 stringResource(R.string.email),
@@ -188,7 +166,7 @@ fun Login(
 
             CampoDeTexto(
                 textPasswd,
-                colors,
+                isValid,
                 changePasswd,
                 Modifier.align(Alignment.CenterHorizontally),
                 stringResource(R.string.password),
@@ -201,6 +179,11 @@ fun Login(
             Boton(
                 Modifier.align(Alignment.CenterHorizontally)
                 ,onClick)
+
+
+            if (isValid && !dismissed){
+                AddAlertDialog(dismiss)
+            }
         }
     }
 }
@@ -219,7 +202,7 @@ fun TitleText(modifier: Modifier, contentAlignment: Alignment,text: String) {
 @Composable
 private fun CampoDeTexto(
     value: String
-    ,colors: TextFieldColors
+    ,isValid : Boolean
     ,x:(String) ->Unit
     ,modifier:Modifier
     ,placeHolder: String
@@ -227,7 +210,9 @@ private fun CampoDeTexto(
     ,transformation: VisualTransformation){
         Column(modifier=modifier) {
             Spacer(Modifier.size(5.dp))
-            Text(text = label,color=Color.White)
+            val col = if (isValid){Color.White} else {Color.Red}
+            val tLabel = if (isValid)label else "ID OR PASSWORD INCORRECT"
+            Text(text = tLabel ,color=col)
             OutlinedTextField(
                 value = value,
                 modifier = Modifier.width(300.dp),
@@ -236,7 +221,32 @@ private fun CampoDeTexto(
                 onValueChange = x,
                 shape = RectangleShape,
                 visualTransformation = transformation,
-                colors = colors
+                colors =
+                if (isValid){
+                    OutlinedTextFieldDefaults.colors(
+                        unfocusedTextColor = Color.LightGray,
+                        focusedTextColor = Color.White,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedPlaceholderColor = Color.LightGray,
+                        unfocusedPlaceholderColor = Color.LightGray
+                    )
+                }else{
+                    OutlinedTextFieldDefaults.colors(
+                        unfocusedTextColor = Color.LightGray,
+                        focusedTextColor = Color.White,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        focusedBorderColor = Color.Red,
+                        unfocusedBorderColor = Color.Red,
+                        focusedLabelColor = Color.Red,
+                        unfocusedLabelColor = Color.Red,
+                        focusedPlaceholderColor = Color.LightGray,
+                        unfocusedPlaceholderColor = Color.LightGray
+                    )
+                }
             )
         }
     }
@@ -247,11 +257,28 @@ fun Boton(modifier: Modifier,onClick: () -> Unit) {
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent
         )
-        ,modifier = modifier.padding(10.dp).width(300.dp)
+        ,modifier = modifier
+            .padding(10.dp)
+            .width(300.dp)
         ,onClick = onClick
         ,shape = RectangleShape
         ,)
     {
         Text(text = "Sign in")
     }
+}
+
+
+@Composable
+private fun AddAlertDialog(dismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = dismiss,
+        title = { Text("Login") },
+        text = { Text("Login correcto") },
+        confirmButton = {
+            Button(onClick = dismiss) {
+                Text("OK")
+            }
+        }
+    )
 }
